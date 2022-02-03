@@ -149,7 +149,7 @@ class MainActivity : AppCompatActivity() {
         val someHandler = Handler(mainLooper)
         someHandler.postDelayed(object : Runnable {
             override fun run() {
-                editText.text = SimpleDateFormat("HH:mm:ss.SSS", Locale.UK).format(Date())
+                editText.text = System.currentTimeMillis().toString()
                 someHandler.postDelayed(this, 1)
             }
         }, 10)
@@ -161,7 +161,15 @@ class MainActivity : AppCompatActivity() {
             .build()
         val listener = EchoWebSocketListener { result ->
             result?.messages?.firstOrNull { it.deviceID == deviceID }?.let {
-                messageText.text = it.message
+                val delay = it.time - System.currentTimeMillis()
+                if (delay > 0) {
+                    val someHandler = Handler(mainLooper)
+                    someHandler.postDelayed(object : Runnable {
+                        override fun run() {
+                            messageText.text = it.message
+                        }
+                    }, delay)
+                }
             }
         }
         val webSocket: WebSocket = mClient.newWebSocket(request, listener)
