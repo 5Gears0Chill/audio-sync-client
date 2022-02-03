@@ -1,12 +1,13 @@
 package com.example.audiosyncronizer
 
 import android.util.Log
-import android.widget.EditText
+import com.google.gson.Gson
+import com.google.gson.JsonParser
+import com.google.gson.JsonSyntaxException
 import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import okio.ByteString
-
 
 class EchoWebSocketListener(private val callback: (result: String?) -> Unit) : WebSocketListener() {
 
@@ -23,6 +24,12 @@ class EchoWebSocketListener(private val callback: (result: String?) -> Unit) : W
 
     override fun onMessage(webSocket: WebSocket, message: String) {
         Log.d("Server", "Receive Message: $message")
+        try {
+            val broadcastMessages = Gson().fromJson(message, BroadcastMessages::class.java)
+        } catch (ex: JsonSyntaxException) {
+            Log.d("Server", "Invalid JSON: $message")
+        }
+
         printMessage(message)
     }
 
