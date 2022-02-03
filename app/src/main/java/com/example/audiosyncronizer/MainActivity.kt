@@ -131,7 +131,7 @@ class MainActivity : AppCompatActivity() {
         val request = Request.Builder().url("wss://demo.piesocket.com/v3/channel_1?api_key=oCdCMcMPQpbvNjUIzqtvF1d2X2okWpDQj4AwARJuAgtjhzKxVEjQU6IdCjwm&notify_self").build()
         val listener = EchoWebSocketListener(messageText)
         val webSocket: WebSocket = mClient.newWebSocket(request, listener)
-        mClient.dispatcher().executorService().shutdown()
+        mClient.dispatcher.executorService.shutdown()
     }
 
     private class EchoWebSocketListener(messageText: EditText) : WebSocketListener() {
@@ -160,10 +160,6 @@ class MainActivity : AppCompatActivity() {
         override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
             webSocket.close(CLOSE_STATUS, null)
             printMessage("Closing Socket : $code / $reason")
-        }
-
-        override fun onFailure(webSocket: WebSocket, throwable: Throwable, response: Response) {
-            printMessage("Error : " + throwable.message)
         }
 
         companion object {
