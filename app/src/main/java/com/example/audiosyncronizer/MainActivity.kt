@@ -95,6 +95,7 @@ class MainActivity : AppCompatActivity() {
                     REQUEST_RECORD_AUDIO_PERMISSION
                 )
             } else {
+                startRecordingButton.text = "RECORDING..."
                 start()
             }
         }
@@ -139,6 +140,7 @@ class MainActivity : AppCompatActivity() {
         handler.removeCallbacks(mSleepTask)
         mSensor!!.stop()
         isRunning = false
+        startRecordingButton.text = "START RECORDING"
     }
 
     private fun sendTimestampToServer() {
