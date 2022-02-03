@@ -8,8 +8,13 @@ import android.os.Handler
 import android.os.PowerManager
 import android.util.Log
 import android.widget.Button
+import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 private const val REQUEST_RECORD_AUDIO_PERMISSION = 200
 private const val POLL_INTERVAL = 100L
@@ -17,6 +22,7 @@ private const val POLL_INTERVAL = 100L
 class MainActivity : AppCompatActivity() {
 
     private lateinit var startRecordingButton: Button
+    private lateinit var currentTime: EditText
     private val handler = Handler()
     private var mSensor: SoundMeter? = null
     private lateinit var mWakeLock: PowerManager.WakeLock
@@ -47,6 +53,8 @@ class MainActivity : AppCompatActivity() {
         startRecordingButton = findViewById(R.id.btnStartRecording)
         filePath = "${baseContext.externalCacheDir!!.absolutePath}/audiorecordtest.3gp"
 
+        currentTime = findViewById(R.id.textTime)
+        startTimer(currentTime)
 
         mSensor = SoundMeter()
         val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
@@ -92,5 +100,15 @@ class MainActivity : AppCompatActivity() {
     private fun sendTimestampToServer() {
         Log.d("PITCH HEARD", "PITCH")
         stop()
+    }
+
+    private fun startTimer(editText: EditText) {
+        val someHandler = Handler(mainLooper)
+        someHandler.postDelayed(object : Runnable {
+            override fun run() {
+                editText.setText(SimpleDateFormat("HH:mm:ss.SSS", Locale.UK).format(Date()))
+                someHandler.postDelayed(this, 1)
+            }
+        }, 10)
     }
 }
