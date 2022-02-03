@@ -1,6 +1,7 @@
 package com.example.audiosyncronizer
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
@@ -21,6 +22,9 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+private const val REQUEST_RECORD_AUDIO_PERMISSION = 200
+private const val POLL_INTERVAL = 100L
+
 class MainActivity : AppCompatActivity() {
 
     private lateinit var mClient: OkHttpClient
@@ -30,9 +34,9 @@ class MainActivity : AppCompatActivity() {
     private val handler = Handler()
     private var mSensor: SoundMeter? = null
     private lateinit var mWakeLock: PowerManager.WakeLock
-    private val mThreshold = 8
-    private val POLL_INTERVAL = 300L
+    private val mThreshold = 8.0
     private var isRunning = false
+    var filePath = ""
 
 
     private val mSleepTask = Runnable {
@@ -42,6 +46,7 @@ class MainActivity : AppCompatActivity() {
     private val mPollTask: Runnable = object : Runnable {
         override fun run() {
             val amp: Double = mSensor!!.amplitude
+            Log.d("Amplitude", amp.toString())
             if (amp > mThreshold) {
                 sendTimestampToServer()
             }
@@ -56,17 +61,21 @@ class MainActivity : AppCompatActivity() {
         mClient = OkHttpClient()
 
         startRecordingButton = findViewById(R.id.btnStartRecording)
+        filePath = "${baseContext.externalCacheDir!!.absolutePath}/audiorecordtest.3gp"
+
         currentTime = findViewById(R.id.textTime)
         messageText = findViewById(R.id.messageTextView)
 
         startTimer(currentTime)
 
         mSensor = SoundMeter()
+        val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
+        mWakeLock = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "audiosyncronizer:my_wake_lock_tag")
         startRecordingButton.setOnClickListener {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
                 != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(this,  arrayOf(Manifest.permission.RECORD_AUDIO),
-                    10)
+                    REQUEST_RECORD_AUDIO_PERMISSION)
             } else {
                 start()
             }
@@ -88,7 +97,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun start() {
-        mSensor!!.start()
+        mSensor!!.start(filePath)
         handler.postDelayed(mPollTask, POLL_INTERVAL)
     }
 
@@ -130,7 +139,7 @@ class MainActivity : AppCompatActivity() {
         val messageText = messageText
 
         private fun printMessage(message: String) {
-            messageText.setText(messageText.text.toString() + "\n" + message)
+            //messageText.setText(messageText.text.toString() + "\n" + message)
         }
 
 
