@@ -38,6 +38,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var animator: ValueAnimator       // Custom animator to drive the lottie
     private lateinit var lottieView: LottieAnimationView
     private lateinit var deviceID: String
+    private lateinit var webSocketListener: EchoWebSocketListener
+    private lateinit var webSocket: WebSocket
 
     private val handler = Handler()
     private var mSensor: SoundMeter? = null
@@ -142,7 +144,7 @@ class MainActivity : AppCompatActivity() {
     private fun sendTimestampToServer() {
         Log.d("PITCH HEARD", "PITCH")
         stop()
-        startWebSocketListener()
+        webSocketListener.sendMessage(webSocket, Gson().toJson(TimestampMessage(System.currentTimeMillis(), deviceID)))
     }
 
     private fun startTimer(editText: TextView) {
@@ -159,7 +161,7 @@ class MainActivity : AppCompatActivity() {
         val request = Request.Builder()
             .url("wss://demo.piesocket.com/v3/channel_1?api_key=oCdCMcMPQpbvNjUIzqtvF1d2X2okWpDQj4AwARJuAgtjhzKxVEjQU6IdCjwm&notify_self")
             .build()
-        val listener = EchoWebSocketListener { result ->
+        webSocketListener= EchoWebSocketListener { result ->
             result?.messages?.firstOrNull { it.deviceID == deviceID }?.let {
                 val delay = it.time - System.currentTimeMillis()
                 if (delay > 0) {
@@ -172,7 +174,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-        val webSocket: WebSocket = mClient.newWebSocket(request, listener)
+        webSocket = mClient.newWebSocket(request, webSocketListener)
         mClient.dispatcher.executorService.shutdown()
     }
 }

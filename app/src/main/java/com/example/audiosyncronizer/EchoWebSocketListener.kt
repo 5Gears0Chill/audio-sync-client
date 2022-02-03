@@ -19,7 +19,12 @@ class EchoWebSocketListener(private val callback: (result: BroadcastMessages?) -
     override fun onOpen(webSocket: WebSocket, response: Response) {
         /*webSocket.send("What's up ?")
         webSocket.send(ByteString.decodeHex("abcd"))
-        webSocket.close(CLOSE_STATUS, "Socket Closed !!")*/
+        webSocket.close(CLO
+        SE_STATUS, "Socket Closed !!")*/
+    }
+
+    fun sendMessage(webSocket: WebSocket, message: String) {
+        webSocket.send(message)
     }
 
     override fun onMessage(webSocket: WebSocket, message: String) {
