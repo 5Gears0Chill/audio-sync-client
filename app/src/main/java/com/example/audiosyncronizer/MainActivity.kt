@@ -12,6 +12,7 @@ import android.util.Log
 import android.view.animation.AccelerateInterpolator
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -31,8 +32,8 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var mClient: OkHttpClient
     private lateinit var startRecordingButton: Button
-    private lateinit var currentTime: EditText
-    private lateinit var messageText: EditText
+    private lateinit var currentTime: TextView
+    private lateinit var messageText: TextView
     private lateinit var animator: ValueAnimator       // Custom animator to drive the lottie
     private lateinit var lottieView: LottieAnimationView
 
@@ -97,6 +98,8 @@ class MainActivity : AppCompatActivity() {
             }
             this
         }
+
+        startWebSocketListener()
     }
 
     override fun onResume() {
@@ -130,14 +133,13 @@ class MainActivity : AppCompatActivity() {
     private fun sendTimestampToServer() {
         Log.d("PITCH HEARD", "PITCH")
         stop()
-        startWebSocketListener()
     }
 
-    private fun startTimer(editText: EditText) {
+    private fun startTimer(editText: TextView) {
         val someHandler = Handler(mainLooper)
         someHandler.postDelayed(object : Runnable {
             override fun run() {
-                editText.setText(SimpleDateFormat("HH:mm:ss.SSS", Locale.UK).format(Date()))
+                editText.text = SimpleDateFormat("HH:mm:ss.SSS", Locale.UK).format(Date())
                 someHandler.postDelayed(this, 1)
             }
         }, 10)
@@ -145,7 +147,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun startWebSocketListener() {
         val request = Request.Builder().url("wss://demo.piesocket.com/v3/channel_1?api_key=oCdCMcMPQpbvNjUIzqtvF1d2X2okWpDQj4AwARJuAgtjhzKxVEjQU6IdCjwm&notify_self").build()
-        val listener = EchoWebSocketListener(messageText)
+        val listener = EchoWebSocketListener {
+            result -> messageText.text = result
+        }
         val webSocket: WebSocket = mClient.newWebSocket(request, listener)
         mClient.dispatcher.executorService.shutdown()
     }

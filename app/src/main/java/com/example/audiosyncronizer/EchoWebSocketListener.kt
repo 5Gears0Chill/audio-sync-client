@@ -1,5 +1,6 @@
 package com.example.audiosyncronizer
 
+import android.util.Log
 import android.widget.EditText
 import okhttp3.Response
 import okhttp3.WebSocket
@@ -7,12 +8,10 @@ import okhttp3.WebSocketListener
 import okio.ByteString
 
 
-class EchoWebSocketListener(messageText: EditText) : WebSocketListener() {
-
-    val messageText = messageText
+class EchoWebSocketListener(private val callback: (result: String?) -> Unit) : WebSocketListener() {
 
     private fun printMessage(message: String) {
-        //messageText.setText(messageText.text.toString() + "\n" + message)
+        callback.invoke(message)
     }
 
 
@@ -23,16 +22,18 @@ class EchoWebSocketListener(messageText: EditText) : WebSocketListener() {
     }
 
     override fun onMessage(webSocket: WebSocket, message: String) {
-        printMessage("Receive Message: $message")
+        Log.d("Server", "Receive Message: $message")
+        printMessage(message)
     }
 
     override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
-        printMessage("Receive Bytes : " + bytes.hex())
+        Log.d("Server", "Receive Bytes : " + bytes.hex())
+        printMessage(bytes.hex())
     }
 
     override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
         webSocket.close(CLOSE_STATUS, null)
-        printMessage("Closing Socket : $code / $reason")
+        Log.d("Server","Closing Socket : $code / $reason")
     }
 
     companion object {
