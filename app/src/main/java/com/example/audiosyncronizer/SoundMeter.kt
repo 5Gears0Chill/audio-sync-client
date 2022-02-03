@@ -1,6 +1,7 @@
 package com.example.audiosyncronizer
 
 import android.media.MediaRecorder
+import java.io.IOException
 
 
 class SoundMeter {
@@ -13,7 +14,15 @@ class SoundMeter {
             mRecorder!!.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
             mRecorder!!.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
             mRecorder!!.setOutputFile("/dev/null")
-            mRecorder!!.prepare()
+            try {
+                mRecorder!!.prepare()
+            } catch (e: IllegalStateException) {
+                // TODO Auto-generated catch block
+                e.printStackTrace()
+            } catch (e: IOException) {
+                // TODO Auto-generated catch block
+                e.printStackTrace()
+            }
             mRecorder!!.start()
         }
     }
