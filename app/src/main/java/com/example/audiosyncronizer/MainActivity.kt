@@ -7,12 +7,18 @@ import android.os.Handler
 import android.os.PowerManager
 import android.util.Log
 import android.widget.Button
+import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var startRecordingButton: Button
+    private lateinit var currentTime: EditText
     private val handler = Handler()
     private var mSensor: SoundMeter? = null
     private lateinit var mWakeLock: PowerManager.WakeLock
@@ -39,6 +45,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         startRecordingButton = findViewById(R.id.btnStartRecording)
+        currentTime = findViewById(R.id.textTime)
+        startTimer(currentTime)
 
         mSensor = SoundMeter()
         startRecordingButton.setOnClickListener {
@@ -82,5 +90,15 @@ class MainActivity : AppCompatActivity() {
     private fun sendTimestampToServer() {
         Log.d("PITCH HEARD", "PITCH")
         stop()
+    }
+
+    private fun startTimer(editText: EditText) {
+        val someHandler = Handler(mainLooper)
+        someHandler.postDelayed(object : Runnable {
+            override fun run() {
+                editText.setText(SimpleDateFormat("HH:mm:ss.SSS", Locale.UK).format(Date()))
+                someHandler.postDelayed(this, 1)
+            }
+        }, 10)
     }
 }
