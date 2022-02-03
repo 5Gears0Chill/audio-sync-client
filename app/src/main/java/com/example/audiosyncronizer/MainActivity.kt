@@ -140,6 +140,7 @@ class MainActivity : AppCompatActivity() {
     private fun sendTimestampToServer() {
         Log.d("PITCH HEARD", "PITCH")
         stop()
+        startWebSocketListener()
     }
 
     private fun startTimer(editText: TextView) {
