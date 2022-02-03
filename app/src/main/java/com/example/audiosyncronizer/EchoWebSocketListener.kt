@@ -9,12 +9,12 @@ import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import okio.ByteString
 
-class EchoWebSocketListener(private val callback: (result: String?) -> Unit) : WebSocketListener() {
+class EchoWebSocketListener(private val callback: (result: BroadcastMessages?) -> Unit) :
+    WebSocketListener() {
 
-    private fun printMessage(message: String) {
+    private fun printMessage(message: BroadcastMessages) {
         callback.invoke(message)
     }
-
 
     override fun onOpen(webSocket: WebSocket, response: Response) {
         /*webSocket.send("What's up ?")
@@ -26,21 +26,19 @@ class EchoWebSocketListener(private val callback: (result: String?) -> Unit) : W
         Log.d("Server", "Receive Message: $message")
         try {
             val broadcastMessages = Gson().fromJson(message, BroadcastMessages::class.java)
+            printMessage(broadcastMessages)
         } catch (ex: JsonSyntaxException) {
             Log.d("Server", "Invalid JSON: $message")
         }
-
-        printMessage(message)
     }
 
     override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
         Log.d("Server", "Receive Bytes : " + bytes.hex())
-        printMessage(bytes.hex())
     }
 
     override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
         webSocket.close(CLOSE_STATUS, null)
-        Log.d("Server","Closing Socket : $code / $reason")
+        Log.d("Server", "Closing Socket : $code / $reason")
     }
 
     companion object {

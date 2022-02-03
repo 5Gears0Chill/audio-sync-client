@@ -37,12 +37,13 @@ class MainActivity : AppCompatActivity() {
     private lateinit var messageText: TextView
     private lateinit var animator: ValueAnimator       // Custom animator to drive the lottie
     private lateinit var lottieView: LottieAnimationView
+    private lateinit var deviceID: String
 
     private val handler = Handler()
     private var mSensor: SoundMeter? = null
     private lateinit var mWakeLock: PowerManager.WakeLock
     private var isRunning = false
-    var filePath = ""
+    private var filePath = ""
 
     private val mSleepTask = Runnable {
         start()
@@ -64,6 +65,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        deviceID = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
         mClient = OkHttpClient()
 
         startRecordingButton = findViewById(R.id.btnStartRecording)
@@ -158,7 +160,9 @@ class MainActivity : AppCompatActivity() {
             .url("wss://demo.piesocket.com/v3/channel_1?api_key=oCdCMcMPQpbvNjUIzqtvF1d2X2okWpDQj4AwARJuAgtjhzKxVEjQU6IdCjwm&notify_self")
             .build()
         val listener = EchoWebSocketListener { result ->
-            messageText.text = result
+            result?.messages?.firstOrNull { it.deviceID == deviceID }?.let {
+                messageText.text = it.message
+            }
         }
         val webSocket: WebSocket = mClient.newWebSocket(request, listener)
         mClient.dispatcher.executorService.shutdown()
