@@ -12,22 +12,19 @@ import android.util.Log
 import android.view.animation.AccelerateInterpolator
 import android.widget.Button
 import android.widget.EditText
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import com.airbnb.lottie.LottieAnimationView
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.Response
 import okhttp3.WebSocket
-import okhttp3.WebSocketListener
-import okio.ByteString
-import androidx.annotation.RequiresApi
-import com.airbnb.lottie.LottieAnimationView
 import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import java.util.*
 
 private const val REQUEST_RECORD_AUDIO_PERMISSION = 200
 private const val POLL_INTERVAL = 100L
+private const val THRESHOLD = 9.0
 
 @RequiresApi(Build.VERSION_CODES.LOLLIPOP_MR1)
 class MainActivity : AppCompatActivity() {
@@ -42,10 +39,8 @@ class MainActivity : AppCompatActivity() {
     private val handler = Handler()
     private var mSensor: SoundMeter? = null
     private lateinit var mWakeLock: PowerManager.WakeLock
-    private val mThreshold = 7.0
     private var isRunning = false
     var filePath = ""
-
 
     private val mSleepTask = Runnable {
         start()
@@ -55,7 +50,7 @@ class MainActivity : AppCompatActivity() {
         override fun run() {
             val amp: Double = mSensor!!.amplitude
             Log.d("Amplitude", amp.toString())
-            if (amp > mThreshold) {
+            if (amp > THRESHOLD) {
                 lottieView.playAnimation()
                 sendTimestampToServer()
             }
@@ -91,8 +86,6 @@ class MainActivity : AppCompatActivity() {
                 start()
             }
         }
-
-        startWebSockerListener()
 
         animator = with(ValueAnimator.ofFloat(0.0f)) {
             interpolator = AccelerateInterpolator()
@@ -137,6 +130,7 @@ class MainActivity : AppCompatActivity() {
     private fun sendTimestampToServer() {
         Log.d("PITCH HEARD", "PITCH")
         stop()
+        startWebSocketListener()
     }
 
     private fun startTimer(editText: EditText) {
@@ -149,44 +143,10 @@ class MainActivity : AppCompatActivity() {
         }, 10)
     }
 
-
-    private fun startWebSockerListener() {
+    private fun startWebSocketListener() {
         val request = Request.Builder().url("wss://demo.piesocket.com/v3/channel_1?api_key=oCdCMcMPQpbvNjUIzqtvF1d2X2okWpDQj4AwARJuAgtjhzKxVEjQU6IdCjwm&notify_self").build()
         val listener = EchoWebSocketListener(messageText)
         val webSocket: WebSocket = mClient.newWebSocket(request, listener)
         mClient.dispatcher.executorService.shutdown()
-    }
-
-    private class EchoWebSocketListener(messageText: EditText) : WebSocketListener() {
-
-        val messageText = messageText
-
-        private fun printMessage(message: String) {
-            //messageText.setText(messageText.text.toString() + "\n" + message)
-        }
-
-
-        override fun onOpen(webSocket: WebSocket, response: Response) {
-            /*webSocket.send("What's up ?")
-            webSocket.send(ByteString.decodeHex("abcd"))
-            webSocket.close(CLOSE_STATUS, "Socket Closed !!")*/
-        }
-
-        override fun onMessage(webSocket: WebSocket, message: String) {
-            printMessage("Receive Message: $message")
-        }
-
-        override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
-            printMessage("Receive Bytes : " + bytes.hex())
-        }
-
-        override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
-            webSocket.close(CLOSE_STATUS, null)
-            printMessage("Closing Socket : $code / $reason")
-        }
-
-        companion object {
-            private const val CLOSE_STATUS = 1000
-        }
     }
 }
