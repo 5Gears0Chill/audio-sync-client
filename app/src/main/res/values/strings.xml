@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">Audio Syncronizer</string>
+    <string name="app_name">Audio Synchronizer</string>
     <string name="start_recording">Start Recording</string>
 </resources>
