@@ -161,7 +161,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun startWebSocketListener() {
         val request = Request.Builder()
-            .url("wss://demo.piesocket.com/v3/channel_1?api_key=oCdCMcMPQpbvNjUIzqtvF1d2X2okWpDQj4AwARJuAgtjhzKxVEjQU6IdCjwm&notify_self")
+            .url("ws://audiosyncer.co.za/ws")
             .build()
         webSocketListener= EchoWebSocketListener { result ->
             result?.messages?.firstOrNull { it.deviceID == deviceID }?.let {
